@@ -3,8 +3,10 @@
 
 BEGIN;
 
+-- 1) Insert canonical tags
 \copy tags(name) FROM '/tmp/generated_tags/generated_tags.csv' WITH (FORMAT csv, HEADER true);
 
+-- 2) Insert gif <-> tag pairs by joining tag names back to tag IDs
 CREATE TEMP TABLE generated_gif_tags_stage (
   gif_id uuid,
   tag_name text,
@@ -21,6 +23,7 @@ JOIN tags t ON t.name = s.tag_name
 JOIN gifs g ON g.id = s.gif_id
 ON CONFLICT (gif_id, tag_id) DO NOTHING;
 
+-- 3) Optional aliases
 CREATE TEMP TABLE generated_tag_aliases_stage (
   alias text,
   tag_name text

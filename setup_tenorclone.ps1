@@ -25,29 +25,48 @@ function Require-Path($path, $label) {
     }
 }
 
-function Run-Checked($command) {
-    Write-Host $command -ForegroundColor DarkGray
-    Invoke-Expression $command
+function Run-Process {
+    param(
+        [Parameter(Mandatory = $true)][string]$FilePath,
+        [Parameter(Mandatory = $false)][string[]]$ArgumentList = @()
+    )
+
+    $display = $FilePath
+    if ($ArgumentList.Count -gt 0) {
+        $display += " " + ($ArgumentList -join " ")
+    }
+    Write-Host $display -ForegroundColor DarkGray
+
+    & $FilePath @ArgumentList
     if ($LASTEXITCODE -ne 0) {
         throw "Command failed with exit code $LASTEXITCODE"
     }
 }
 
 function Exec-Psql($sql) {
-    $escaped = $sql.Replace('"', '\"')
-    Run-Checked "docker exec -i $ContainerName psql -U $DbUser -d $DbName -v ON_ERROR_STOP=1 -c \"$escaped\""
+    Run-Process "docker" @(
+        "exec", "-i", $ContainerName,
+        "psql", "-U", $DbUser, "-d", $DbName,
+        "-v", "ON_ERROR_STOP=1",
+        "-c", $sql
+    )
 }
 
 function Copy-And-RunSqlFile($localFile, $remoteFile) {
     Require-Path $localFile "SQL file"
-    Run-Checked "docker cp $localFile ${ContainerName}:$remoteFile"
-    Run-Checked "docker exec -i $ContainerName psql -U $DbUser -d $DbName -v ON_ERROR_STOP=1 -f $remoteFile"
+    Run-Process "docker" @("cp", $localFile, "${ContainerName}:$remoteFile")
+    Run-Process "docker" @(
+        "exec", "-i", $ContainerName,
+        "psql", "-U", $DbUser, "-d", $DbName,
+        "-v", "ON_ERROR_STOP=1",
+        "-f", $remoteFile
+    )
 }
 
 function Wait-ForDb() {
     Step "Waiting for Postgres to be ready"
     for ($i = 0; $i -lt 60; $i++) {
-        docker exec $ContainerName pg_isready -U $DbUser -d $DbName *> $null
+        & docker exec $ContainerName pg_isready -U $DbUser -d $DbName *> $null
         if ($LASTEXITCODE -eq 0) {
             Write-Host "Postgres is ready." -ForegroundColor Green
             return
@@ -77,8 +96,8 @@ function Import-Gifs() {
     Require-Path $GifCsv "GIF CSV"
 
     Exec-Psql "TRUNCATE gif_tags, tag_aliases, tags, gifs RESTART IDENTITY CASCADE;"
-    Run-Checked "docker cp $GifCsv ${ContainerName}:/tmp/seed_gifs_large.csv"
-    Run-Checked "docker exec -i $ContainerName psql -U $DbUser -d $DbName -v ON_ERROR_STOP=1 -c \"\\copy gifs(id,source_url,cdn_url,title,rating,width,height,filesize_bytes,duration_ms,is_deleted,is_unlisted,created_at) FROM '/tmp/seed_gifs_large.csv' WITH (FORMAT csv, HEADER true)\""
+    Run-Process "docker" @("cp", $GifCsv, "${ContainerName}:/tmp/seed_gifs_large.csv")
+    Exec-Psql "\copy gifs(id,source_url,cdn_url,title,rating,width,height,filesize_bytes,duration_ms,is_deleted,is_unlisted,created_at) FROM '/tmp/seed_gifs_large.csv' WITH (FORMAT csv, HEADER true)"
 }
 
 function Generate-Tags() {
@@ -86,12 +105,18 @@ function Generate-Tags() {
     Require-Path $TagScript "Tag generation script"
     Require-Path $GifCsv "GIF CSV"
 
-    $aliasArg = ""
+    $pythonArgs = @(
+        $TagScript,
+        "--input", $GifCsv,
+        "--outdir", $GeneratedTagDir,
+        "--min-count", $MinCount.ToString()
+    )
+
     if ($IncludeAliases) {
-        $aliasArg = " --include-aliases"
+        $pythonArgs += "--include-aliases"
     }
 
-    Run-Checked "python $TagScript --input $GifCsv --outdir $GeneratedTagDir --min-count $MinCount$aliasArg"
+    Run-Process "python" $pythonArgs
 
     $sqlFile = Join-Path $GeneratedTagDir "import_generated_tags.sql"
     Require-Path $sqlFile "Generated import SQL"
@@ -115,9 +140,14 @@ function Import-Tags() {
     Require-Path $sqlFile "Generated import SQL"
 
     Exec-Psql "TRUNCATE gif_tags, tag_aliases, tags RESTART IDENTITY CASCADE;"
-    Run-Checked "docker cp $GeneratedTagDir ${ContainerName}:/tmp/generated_tags"
-    Run-Checked "docker cp $sqlFile ${ContainerName}:/tmp/import_generated_tags.sql"
-    Run-Checked "docker exec -i $ContainerName psql -U $DbUser -d $DbName -v ON_ERROR_STOP=1 -f /tmp/import_generated_tags.sql"
+    Run-Process "docker" @("cp", $GeneratedTagDir, "${ContainerName}:/tmp/generated_tags")
+    Run-Process "docker" @("cp", $sqlFile, "${ContainerName}:/tmp/import_generated_tags.sql")
+    Run-Process "docker" @(
+        "exec", "-i", $ContainerName,
+        "psql", "-U", $DbUser, "-d", $DbName,
+        "-v", "ON_ERROR_STOP=1",
+        "-f", "/tmp/import_generated_tags.sql"
+    )
 }
 
 function Show-Counts() {
@@ -130,9 +160,9 @@ function Show-Counts() {
 
 Step "Starting database container"
 if (Test-Path $ComposeFile) {
-    Run-Checked "docker compose -f $ComposeFile up -d db"
+    Run-Process "docker" @("compose", "-f", $ComposeFile, "up", "-d", "db")
 } else {
-    Run-Checked "docker compose up -d db"
+    Run-Process "docker" @("compose", "up", "-d", "db")
 }
 
 Wait-ForDb
