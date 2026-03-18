@@ -1,0 +1,206 @@
+input_csv=.\seeddata\seed_gifs_large.csv
+retained_unique_tags=24110
+min_count=10
+max_count=0
+
+Top 200 tags by frequency:
+*  32450  happy
+*  29041  lol
+*  28996  sad
+*  28589  excited
+*  27906  shocked
+*  27540  funny
+*  27304  clapping
+*  27303  wow
+*  27084  facepalm
+*   6663  dancing
+*   6113  mashable
+*   5571  love
+*   5425  music
+*   4912  awards
+*   4888  2016
+*   4095  animation
+*   3776  show
+*   3733  dog
+*   3525  art
+*   3443  black
+*   3413  new
+*   3390  cat
+*   3351  season
+*   3253  no
+*   3055  originals
+*   2653  fox
+*   2639  studios
+*   2600  game
+*   2536  cheezburger
+*   2527  election
+*   2488  girl
+*   2384  angry
+*   2299  thrones
+*   2282  loop
+*   2271  game thrones
+*   2179  studios originals
+*   2111  white
+*   2105  dance
+*   2072  day
+*   2042  kim
+*   1907  beyonce
+*   1866  90s
+*   1855  disney
+*   1818  man
+*   1797  star
+*   1785  live
+*   1749  black white
+*   1734  real
+*   1695  national
+*   1675  kiss
+*   1621  night
+*   1587  city
+*   1576  rock
+*   1574  convention
+*   1569  housewives
+*   1569  real housewives
+*   1543  bet
+*   1527  hbo
+*   1515  party
+*   1508  animatedtext
+*   1505  american
+*   1505  home
+*   1471  james
+*   1463  comedy
+*   1431  fail
+*   1427  drinking
+*   1397  eating
+*   1345  hop
+*   1339  vh1
+*   1334  tony
+*   1327  chris
+*   1322  hip
+*   1311  jennifer
+*   1296  bet awards
+*   1293  laughing
+*   1286  girls
+*   1279  national convention
+*   1257  jimmy
+*   1252  america s
+*   1247  yes
+*   1241  simpson
+*   1237  michael
+*   1228  smile
+*   1200  mtv
+*   1185  records
+*   1174  eye
+*   1171  christmas
+*   1169  time
+*   1162  world
+*   1158  kardashian
+*   1153  oh
+*   1146  warner
+*   1146  archive
+*   1145  wars
+*   1140  central
+*   1140  comedy central
+*   1138  scared
+*   1136  high
+*   1131  thumbs
+*   1111  flirting
+*   1109  democratic
+*   1100  got
+*   1090  mad
+*   1090  david
+*   1082  good
+*   1070  taylor
+*   1068  star wars
+*   1066  roll
+*   1058  saturday
+*   1053  red
+*   1047  simpsons
+*   1044  empire
+*   1043  democratic national
+*   1039  wtf
+*   1037  omg
+*   1036  nba
+*   1036  nation
+*   1035  america
+*   1034  fallon
+*   1026  saturday night
+*   1025  john
+*   1019  ball
+*   1019  york
+*   1019  new york
+*   1016  confused
+*    999  eye roll
+*    999  family
+*    992  hip hop
+*    986  running
+*    985  awkward
+*    982  hello
+*    981  dnc
+*    974  tonight
+*    972  univision
+*    965  crying
+*    959  donald
+*    957  ice
+*    955  story
+*    955  sb
+*    955  sb nation
+*    954  obama
+*    953  summer
+*    952  tony awards
+*    951  park
+*    945  warner archive
+*    943  harry
+*    942  stephen
+*    936  homer
+*    932  five
+*    925  basketball
+*    924  will
+*    923  down
+*    922  justin
+*    920  kids
+*    916  episode
+*    915  birthday
+*    914  baby
+*    912  bill
+*    911  homer simpson
+*    911  hug
+*    905  hair
+*    902  deportes
+*    899  parks
+*    899  late
+*    885  horror
+*    884  tom
+*    882  colbert
+*    868  festival
+*    863  jimmy fallon
+*    862  high five
+*    858  television
+*    855  empire fox
+*    851  bad
+*    851  snl
+*    846  jason
+*    846  rihanna
+*    844  trump
+*    842  orange
+*    841  hot
+*    840  kim kardashian
+*    839  swift
+*    839  taylor swift
+*    826  go
+*    822  amy
+*    820  race
+*    818  music awards
+*    807  ghostbusters
+*    802  fun
+*    800  falling
+*    799  bachelorette
+*    797  recreation
+*    790  not
+*    787  drag
+*    785  3d
+*    778  britney
+*    778  spears
+*    778  britney spears
+*    776  frustrated
+*    774  vintage
+*    772  parks recreation
