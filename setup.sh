@@ -29,6 +29,9 @@ for f in db/migrations/*.sql; do
   docker exec -i "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" < "$f"
 done
 
+echo "🧹 Clearing existing data..."
+docker exec -i "$DB_CONTAINER" psql -U "$DB_USER" -d "$DB_NAME" -c "TRUNCATE TABLE gif_tags, tag_aliases, tags, gifs RESTART IDENTITY CASCADE;"
+
 # --- 3. Seed GIFs ---
 echo "🎞️ Seeding GIF data..."
 
