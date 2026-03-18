@@ -1,243 +1,78 @@
-# GifferJiff Backend Database Setup
+# 🎬 TenorClone Backend Setup
 
-This project uses **PostgreSQL running in Docker**. The database schema
-is created using versioned SQL migrations and populated with seed GIF
-metadata.
+This project provides a PostgreSQL-backed GIF database with generated tags, ready for search and API development.
 
-Follow the steps below to start the database and seed it on a new
-machine.
+---
 
-------------------------------------------------------------------------
+## 🚀 Quick Start (Windows PowerShell)
 
-# Prerequisites
+After cloning the repo, open PowerShell in the project root and run:
 
-Install the following before starting:
+powershell -ExecutionPolicy Bypass -File .\setup_tenorclone.ps1
 
--   **Git**
--   **Docker Desktop** (includes Docker Compose)
--   **WSL2** (Windows only)
+This is the **only command you need** to fully set up the database.
 
-Ensure **Docker Desktop is running** before executing the commands
-below.
+---
 
-------------------------------------------------------------------------
+## 📦 Prerequisites
 
-# 1. Clone the Repository
+Make sure you have:
 
-``` bash
-git clone <repository-url>
-cd GifferJiff-Back-End
-```
+- Docker Desktop (running)
+- Python 3 installed (for tag generation)
+- PowerShell (Windows)
 
-------------------------------------------------------------------------
+---
 
-# 2. Start the PostgreSQL Database
+## ⚙️ What the Setup Script Does
 
-Start the database container:
+Running the command above will automatically:
 
-``` bash
-docker compose up -d db
-```
+1. Start PostgreSQL in Docker
+2. Apply database migrations
+3. Seed GIF data (~300,000 GIFs)
+4. Generate tags
+5. Import tags into the database
 
-Verify the container is running:
+---
 
-``` bash
-docker ps
-```
+## 🧪 Verify It Worked
 
-You should see a container similar to:
+Run:
 
-    tenorclone-db
-
-------------------------------------------------------------------------
-
-# 3. Run Database Migrations
-
-Apply the database schema:
-
-``` bash
-docker compose run --rm db_migrate
-```
-
-This command:
-
--   waits for PostgreSQL to start
--   runs all SQL files in `/db/migrations`
--   records applied migrations in `schema_migrations`
-
-------------------------------------------------------------------------
-
-# 4. Seed the Database
-
-Populate the database with GIF metadata from the seed dataset.
-
-Run this command **from the root of the repository**:
-
-``` bash
-docker exec -i tenorclone-db psql -U app -d tenorclone -c "\copy gifs(id,source_url,cdn_url,title,rating,width,height,filesize_bytes,duration_ms,is_deleted,is_unlisted,created_at) FROM STDIN WITH (FORMAT csv, HEADER true)" < seeddata/seed_gifs_large.csv
-```
-
-This streams the CSV file from your local machine into the PostgreSQL
-container and inserts the records into the `gifs` table.
-
-------------------------------------------------------------------------
-
-# 5. Verify the Database
-
-Check that the data was inserted successfully:
-
-``` bash
-docker exec -it tenorclone-db psql -U app -d tenorclone -c 'SELECT COUNT(*) FROM gifs;'
-```
-
-You should see something similar to:
-
-     count
-    -------
-     300000
-
-You can also open the PostgreSQL shell:
-
-``` bash
 docker exec -it tenorclone-db psql -U app -d tenorclone
-```
 
-List tables:
+Then:
 
-``` sql
-\dt
-```
+SELECT COUNT(*) FROM gifs;
+SELECT COUNT(*) FROM tags;
+SELECT COUNT(*) FROM gif_tags;
 
-Exit the shell:
+---
 
-``` sql
-\q
-```
+## 🔁 Re-running Setup
 
-------------------------------------------------------------------------
+powershell -ExecutionPolicy Bypass -File .\setup_tenorclone.ps1
 
-# Daily Development Workflow
+---
 
-Start the database:
+## 📁 Important Files
 
-``` bash
-docker compose up -d db
-```
+- setup_tenorclone.ps1
+- seeddata/seed_gifs_large.csv
+- scripts/generate_tags_for_schema.py
+- db/migrations/
 
-If new migrations were added after pulling changes:
+---
 
-``` bash
-docker compose run --rm db_migrate
-```
+## 🛠 Troubleshooting
 
-------------------------------------------------------------------------
+Docker not running → Start Docker Desktop  
+Permission error → Use ExecutionPolicy Bypass  
+Missing seed → Ensure seeddata/seed_gifs_large.csv exists  
 
-# Reset the Database (Clean Rebuild)
+---
 
-If something breaks or you want to rebuild the database from scratch:
+## ✅ Done
 
-``` bash
-docker compose down -v
-docker compose up -d db
-docker compose run --rm db_migrate
-```
-
-Then run the seed command again.
-
-⚠️ This deletes **all local database data**.
-
-------------------------------------------------------------------------
-
-# Useful Commands
-
-### Start database
-
-``` bash
-docker compose up -d db
-```
-
-### Stop database
-
-``` bash
-docker compose down
-```
-
-### Re-run migrations
-
-``` bash
-docker compose run --rm db_migrate
-```
-
-### Open PostgreSQL CLI
-
-``` bash
-docker exec -it tenorclone-db psql -U app -d tenorclone
-```
-
-### List tables
-
-``` sql
-\dt
-```
-
-### View sample GIF records
-
-``` sql
-SELECT * FROM gifs LIMIT 10;
-```
-
-------------------------------------------------------------------------
-
-# Troubleshooting
-
-## Container name already in use
-
-If Docker reports the container already exists:
-
-``` bash
-docker compose down
-docker rm -f tenorclone-db
-docker compose up -d db
-```
-
-------------------------------------------------------------------------
-
-## No tables appear after migration
-
-If `\dt` shows **no relations**:
-
-``` bash
-docker compose down -v
-docker compose up -d db
-docker compose run --rm db_migrate
-```
-
-Then run the seed command again.
-
-------------------------------------------------------------------------
-
-## Migration script errors (`\r`, invalid option, etc.)
-
-This usually happens due to **Windows CRLF line endings**.
-
-Convert scripts to **LF**.
-
-In VS Code:
-
-1.  Open the script file
-2.  Click `CRLF` in the bottom-right
-3.  Change to `LF`
-4.  Save
-
-------------------------------------------------------------------------
-
-# Local Database Configuration
-
-Default values (defined in `docker-compose.yml`):
-
-  Setting    Value
-  ---------- ------------
-  Host       localhost
-  Port       5432
-  Database   tenorclone
-  User       app
+Your database is now ready for API development and search experiments.
